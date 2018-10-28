@@ -1,0 +1,10 @@
+# Build and Release Folders
+test/
+*_local.*
+
+# data
+*.csv
+*.mx
+
+# System Files
+.DS_Store
