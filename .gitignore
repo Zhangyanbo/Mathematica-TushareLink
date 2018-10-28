@@ -5,6 +5,7 @@ test/
 # data
 *.csv
 *.mx
+*_db.*
 
 # System Files
 .DS_Store
