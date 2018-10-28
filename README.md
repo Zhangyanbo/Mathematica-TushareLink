@@ -1,0 +1,2 @@
+# Mathematica-TushareLink
+Wolfram Mathematica连接Tushare的包，在Mathematica中获取A股数据
