@@ -21,12 +21,21 @@ ExchangeID\[Rule]\:4ea4\:6613\:6240\:ff1aSSE\:4e0a\:4ea4\:6240 SZSE\:6df1\:4ea4\
 Outputs\[Rule]\:8f93\:51fa\:53c2\:6570
 \:66f4\:591a\:4fe1\:606f\:53c2\:89c1\:ff1ahttps://tushare.pro/document/2?doc_id=25"
 
+TradeCalendar::usage = "TradeCalendar[\:8fde\:63a5\:ff0c\:9009\:9879]\:ff0c\:83b7\:5f97\:4ea4\:6613\:65e5\:5386
+\:9009\:9879\:ff1a
+ExchangeID\[Rule]\"SSE\", \:4ea4\:6613\:6240\:ff1aSSE\:4e0a\:4ea4\:6240\:ff0cSZSE\:6df1\:4ea4\:6240
+StartDate, \:5f00\:59cb\:65e5\:671f
+EndDate, \:7ed3\:675f\:65e5\:671f
+IsOpen\[Rule]\"\", \:53ea\:770b\:5f00/\:95ed\:5e02\:ff08\:9ed8\:8ba4\:67e5\:770b\:6240\:6709\:72b6\:6001\:ff09
+"
+
 
 Begin["`Private`"]
 
 
 openLinkCode[api_]:=StringTemplate["
 import tushare as ts
+import numpy as np
 api = ts.pro_api('``')
 "][api]
 
@@ -71,6 +80,29 @@ ExternalEvaluate[conn,StringTemplate["
 tdata = api.stock_basic(is_hs = '``', exchange_id='``', list_status='``', fields=``)
 dict(tdata)
 "][OptionValue[IsHS],OptionValue[ExchangeID],OptionValue[ListStatus],fields]]
+]
+
+
+(* ::Subsection:: *)
+(*TradeCal: \:4ea4\:6613\:65e5\:5386*)
+
+
+Options[TradeCalendar]={ExchangeID->"SSE",StartDate->"",EndDate->"",IsOpen->""}
+
+TradeCalendar[conn_,OptionsPattern[]]:=Module[{std=OptionValue[StartDate],endd=OptionValue[EndDate],output},
+If[\[Not]StringQ[std],std=DateObjectToStr[std]];
+If[\[Not]StringQ[endd],endd=DateObjectToStr[endd]];
+output=ExternalEvaluate[conn,
+StringTemplate["
+tdata = api.trade_cal(exchange_id='``', start_date='``', end_date='``', is_open='``')
+is_open=list(map(lambda x: x.item(), list(tdata['is_open'])))
+tdata=dict(tdata)
+tdata['is_open']=is_open
+tdata"][OptionValue[ExchangeID],std,endd,OptionValue[IsOpen]]
+];
+output["is_open"]=(output["is_open"]/.{0->False,1->True});
+output["cal_date"]=DateObject[#,TimeZone->"Asia/Shanghai"]&/@output["cal_date"];
+output
 ]
 
 
